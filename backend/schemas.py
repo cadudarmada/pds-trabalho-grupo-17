@@ -17,6 +17,12 @@ class UsuarioCreate(BaseModel):
 
         return valor
 
+
+class UsuarioLogin(BaseModel):
+    email: EmailStr
+    senha: str
+
+
 class UsuarioResponse(BaseModel):
     id: int
     nome: str

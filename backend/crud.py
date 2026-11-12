@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from models import Usuario
 from schemas import UsuarioCreate
 from security import gerar_hash_senha
+from security import verificar_senha
 
 
 def buscar_usuario_por_email(db: Session, email: str) -> Usuario | None:
@@ -23,3 +24,14 @@ def criar_usuario(db: Session, usuario: UsuarioCreate) -> Usuario:
     db.refresh(novo_usuario)
 
     return novo_usuario
+
+def autenticar_usuario(db: Session, email: str, senha: str) -> Usuario | None:
+    usuario = buscar_usuario_por_email(db, email)
+
+    if usuario is None:
+        return None
+
+    if not verificar_senha(senha, usuario.senha_hash):
+        return None
+
+    return usuario
