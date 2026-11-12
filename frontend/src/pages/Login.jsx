@@ -15,6 +15,8 @@ function Login() {
     setMensagem("");
     setTipoMensagem("");
 
+    sessionStorage.removeItem("access_token");
+
     if (!email.trim() || !senha) {
       setTipoMensagem("erro");
       setMensagem("Preencha o e-mail e a senha.");
@@ -49,6 +51,34 @@ function Login() {
           typeof dados.detail === "string"
             ? dados.detail
             : "Não foi possível realizar o login."
+        );
+      }
+
+      if (!dados.access_token) {
+        throw new Error("O servidor não retornou o token de autenticação.");
+      }
+
+      sessionStorage.setItem("access_token", dados.access_token);
+
+      const respostaUsuario = await fetch(
+        "http://127.0.0.1:8000/usuarios/me",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${dados.access_token}`,
+          },
+        }
+      );
+
+      const dadosUsuario = await respostaUsuario.json();
+
+      if (!respostaUsuario.ok) {
+        sessionStorage.removeItem("access_token");
+
+        throw new Error(
+          typeof dadosUsuario.detail === "string"
+            ? dadosUsuario.detail
+            : "Não foi possível validar a autenticação."
         );
       }
 
