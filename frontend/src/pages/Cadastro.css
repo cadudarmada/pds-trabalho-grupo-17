@@ -1,0 +1,87 @@
+
+.cadastro-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f1ea;
+  font-family: Arial, sans-serif;
+}
+
+.cadastro-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 32px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.cadastro-card h1 {
+  margin-bottom: 8px;
+  color: #292929;
+}
+
+.cadastro-card p {
+  margin-bottom: 24px;
+  color: #666;
+}
+
+.cadastro-campo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.cadastro-campo label {
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #333;
+}
+
+.cadastro-campo input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.cadastro-campo input:focus {
+  outline: none;
+  border-color: #65745b;
+}
+
+.cadastro-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #65745b;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.cadastro-card button:hover {
+  background-color: #4f5c47;
+}
+
+
+.mensagem {
+  padding: 12px;
+  margin-bottom: 18px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.mensagem.erro {
+  background-color: #fde8e8;
+  color: #b42318;
+  border: 1px solid #f5c2c0;
+}
+
+.mensagem.sucesso {
+  background-color: #e7f5e9;
+  color: #237a38;
+  border: 1px solid #b7dfbd;
+}
