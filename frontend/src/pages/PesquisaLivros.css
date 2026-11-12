@@ -1,0 +1,185 @@
+
+.pagina-pesquisa {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 32px;
+    text-align: left;
+}
+
+.introducao-pesquisa {
+    padding: 30px;
+    background-color: #edf3ef;
+    border-radius: 10px;
+    margin-bottom: 36px;
+}
+
+.introducao-pesquisa h1 {
+    font-size: 34px;
+    margin: 0 0 12px;
+    letter-spacing: -0.8px;
+}
+
+.introducao-pesquisa p {
+    color: #65746a;
+    font-size: 15px;
+    margin-bottom: 22px;
+}
+
+.formulario-pesquisa {
+    display: flex;
+    gap: 10px;
+}
+
+.formulario-pesquisa input {
+    flex: 1;
+    min-width: 0;
+    padding: 13px 15px;
+    border: 1px solid #d5dfd8;
+    border-radius: 7px;
+    background-color: #ffffff;
+    color: #263b32;
+    outline: none;
+}
+
+.formulario-pesquisa input:focus {
+    border-color: #397653;
+}
+
+.formulario-pesquisa button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 7px;
+    background-color: #397653;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.formulario-pesquisa button:hover {
+    background-color: #2d6043;
+}
+
+.formulario-pesquisa button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.secao-resultados h2 {
+    font-size: 23px;
+    margin-bottom: 22px;
+}
+
+.lista-livros {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.livro-card {
+    display: flex;
+    gap: 20px;
+    padding: 18px;
+    background-color: #ffffff;
+    border: 1px solid #e3e9e5;
+    border-radius: 9px;
+}
+
+.livro-capa {
+    flex-shrink: 0;
+    width: 115px;
+}
+
+.livro-capa img {
+    width: 100%;
+    height: 165px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.capa-indisponivel {
+    width: 100%;
+    height: 165px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #edf3ef;
+    color: #65746a;
+    font-size: 12px;
+    text-align: center;
+}
+
+.livro-informacoes {
+    min-width: 0;
+}
+
+.livro-informacoes h3 {
+    color: #263b32;
+    font-size: 19px;
+    margin: 2px 0 8px;
+}
+
+.livro-informacoes p {
+    color: #65746a;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.livro-informacoes .livro-autores {
+    color: #397653;
+    font-weight: 600;
+}
+
+.livro-informacoes .livro-descricao {
+    margin-top: 12px;
+    line-height: 1.5;
+    display: -webkit-box;
+    line-clamp: 4;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mensagem-pesquisa,
+.mensagem-erro {
+    padding: 18px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    color: #65746a;
+}
+
+.mensagem-erro {
+    color: #b42318;
+}
+
+@media (max-width: 600px) {
+    .pagina-pesquisa {
+        padding: 24px 16px;
+    }
+
+    .introducao-pesquisa {
+        padding: 20px;
+    }
+
+    .introducao-pesquisa h1 {
+        font-size: 27px;
+    }
+
+    .formulario-pesquisa {
+        flex-direction: column;
+    }
+
+    .livro-card {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .livro-capa {
+        width: 85px;
+    }
+
+    .livro-capa img,
+    .capa-indisponivel {
+        height: 125px;
+    }
+}

@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+import "./PesquisaLivros.css";
 
 function PesquisaLivros() {
     const [termo, setTermo] = useState("");
@@ -40,67 +42,95 @@ function PesquisaLivros() {
     }
 
     return (
-        <div>
-            <h1>Pesquisar livros</h1>
+        <main className="pagina-pesquisa">
+            <section className="introducao-pesquisa">
+                <h1>Descubra seu próximo livro.</h1>
 
-            <p>
-                Encontre livros pelo título ou pelo nome do autor.
-            </p>
+                <p>
+                    Explore livros, encontre novos autores e descubra
+                    histórias que merecem ser lidas.
+                </p>
 
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Digite o título ou autor..."
-                    value={termo}
-                    onChange={(evento) => setTermo(evento.target.value)}
-                />
+                <form
+                    className="formulario-pesquisa"
+                    onSubmit={handleSubmit}
+                >
+                    <input
+                        type="text"
+                        placeholder="Pesquise por título ou autor..."
+                        value={termo}
+                        onChange={(evento) => setTermo(evento.target.value)}
+                    />
 
-                <button type="submit" disabled={carregando}>
-                    {carregando ? "Pesquisando..." : "Pesquisar"}
-                </button>
-            </form>
+                    <button type="submit" disabled={carregando}>
+                        {carregando ? "Pesquisando..." : "Pesquisar"}
+                    </button>
+                </form>
+            </section>
 
-            {carregando && <p>Pesquisando livros...</p>}
+            <section className="secao-resultados">
+                {carregando && (
+                    <p className="mensagem-pesquisa">
+                        Pesquisando livros...
+                    </p>
+                )}
 
-            {erro && <p>{erro}</p>}
+                {erro && (
+                    <p className="mensagem-erro">{erro}</p>
+                )}
 
-            {pesquisou && !carregando && !erro && livros.length === 0 && (
-                <p>Nenhum livro encontrado.</p>
-            )}
+                {pesquisou && !carregando && !erro && livros.length === 0 && (
+                    <p className="mensagem-pesquisa">
+                        Nenhum livro encontrado.
+                    </p>
+                )}
 
-            <div>
-                {livros.map((livro) => (
-                    <div key={livro.id}>
-                        {livro.capa && (
-                            <img
-                                src={livro.capa}
-                                alt={`Capa de ${livro.titulo}`}
-                                width="120"
-                            />
-                        )}
+                {livros.length > 0 && (
+                    <>
+                        <h2>Resultados da pesquisa</h2>
 
-                        <h2>{livro.titulo}</h2>
+                        <div className="lista-livros">
+                            {livros.map((livro) => (
+                                <article className="livro-card" key={livro.id}>
+                                    <div className="livro-capa">
+                                        {livro.capa ? (
+                                            <img
+                                                src={livro.capa}
+                                                alt={`Capa de ${livro.titulo}`}
+                                            />
+                                        ) : (
+                                            <div className="capa-indisponivel">
+                                                Capa indisponível
+                                            </div>
+                                        )}
+                                    </div>
 
-                        <p>
-                            Autor(es): {livro.autores.join(", ") || "Não informado"}
-                        </p>
+                                    <div className="livro-informacoes">
+                                        <h3>{livro.titulo}</h3>
 
-                        <p>
-                            Editora: {livro.editora || "Não informada"}
-                        </p>
+                                        <p className="livro-autores">
+                                            {livro.autores.join(", ") || "Autor não informado"}
+                                        </p>
 
-                        <p>
-                            Publicação: {livro.data_publicacao || "Não informada"}
-                        </p>
+                                        <p>
+                                            {livro.editora || "Editora não informada"}
+                                            {" · "}
+                                            {livro.data_publicacao || "Data não informada"}
+                                        </p>
 
-                        {livro.descricao && (
-                            <p>{livro.descricao}</p>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-        </div>
+                                        {livro.descricao && (
+                                            <p className="livro-descricao">
+                                                {livro.descricao}
+                                            </p>
+                                        )}
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </section>
+        </main>
     );
 }
 
