@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from schemas import UsuarioCreate, UsuarioLogin, UsuarioResponse, Token
-from crud import buscar_usuario_por_email, criar_usuario, autenticar_usuario
+from services.usuario_service import UsuarioService
 from jwt_utils import criar_access_token, verificar_access_token
 
 router = APIRouter(
@@ -13,6 +13,7 @@ router = APIRouter(
 )
 
 bearer_scheme = HTTPBearer()
+
 
 @router.post(
     "/cadastro",
@@ -23,7 +24,9 @@ def cadastrar_usuario(
     usuario: UsuarioCreate,
     db: Session = Depends(get_db)
 ):
-    usuario_existente = buscar_usuario_por_email(db, usuario.email)
+    usuario_service = UsuarioService(db)
+
+    usuario_existente = usuario_service.buscar_por_email(usuario.email)
 
     if usuario_existente:
         raise HTTPException(
@@ -31,9 +34,10 @@ def cadastrar_usuario(
             detail="Este e-mail já está cadastrado."
         )
 
-    novo_usuario = criar_usuario(db, usuario)
+    novo_usuario = usuario_service.cadastrar(usuario)
 
     return novo_usuario
+
 
 @router.post(
     "/login",
@@ -44,7 +48,9 @@ def login_usuario(
     dados: UsuarioLogin,
     db: Session = Depends(get_db)
 ):
-    usuario = autenticar_usuario(db, dados.email, dados.senha)
+    usuario_service = UsuarioService(db)
+
+    usuario = usuario_service.autenticar(dados.email, dados.senha)
 
     if usuario is None:
         raise HTTPException(
@@ -60,6 +66,7 @@ def login_usuario(
         "access_token": access_token,
         "token_type": "bearer"
     }
+
 
 @router.get("/me")
 def obter_usuario_autenticado(

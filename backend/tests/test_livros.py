@@ -18,7 +18,7 @@ def test_pesquisar_livros_com_sucesso(client, monkeypatch):
         }
 
     monkeypatch.setattr(
-        "routers.livros.buscar_livros",
+        "routers.livros.google_books_service.buscar_livros",
         mock_buscar_livros
     )
 
@@ -51,7 +51,7 @@ def test_pesquisar_livros_com_erro_na_api(client, monkeypatch):
         raise RuntimeError("Não foi possível conectar à Google Books API.")
 
     monkeypatch.setattr(
-        "routers.livros.buscar_livros",
+        "routers.livros.google_books_service.buscar_livros",
         mock_buscar_livros
     )
 

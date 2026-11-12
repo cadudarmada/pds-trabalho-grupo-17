@@ -1,12 +1,13 @@
-
 from fastapi import APIRouter, HTTPException, Query
 
-from services.google_books import buscar_livros
+from services.google_books import GoogleBooksService
 
 router = APIRouter(
     prefix="/livros",
     tags=["Livros"]
 )
+
+google_books_service = GoogleBooksService()
 
 
 @router.get("/pesquisa")
@@ -17,7 +18,7 @@ def pesquisar_livros(
     )
 ):
     try:
-        resultado = buscar_livros(termo)
+        resultado = google_books_service.buscar_livros(termo)
         return resultado
 
     except RuntimeError as erro:
