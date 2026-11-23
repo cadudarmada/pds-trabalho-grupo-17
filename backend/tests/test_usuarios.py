@@ -1,5 +1,5 @@
 from core.security import PasswordHasher
-from models import Usuario
+from models.usuario import Usuario
 
 
 
