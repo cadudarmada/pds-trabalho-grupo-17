@@ -199,3 +199,114 @@ def test_cadastrar_usuario_sem_senha(client):
     )
 
     assert resposta.status_code == 422
+
+
+def test_login_usuario_com_sucesso(client):
+    client.post(
+        "/usuarios/cadastro",
+        json={
+            "nome": "Usuario Login",
+            "email": "login@exemplo.com",
+            "senha": "SenhaSegura123"
+        }
+    )
+
+    resposta = client.post(
+        "/usuarios/login",
+        json={
+            "email": "login@exemplo.com",
+            "senha": "SenhaSegura123"
+        }
+    )
+
+    assert resposta.status_code == 200
+
+    dados = resposta.json()
+
+    assert "access_token" in dados
+    assert dados["access_token"]
+    assert dados["token_type"] == "bearer"
+
+
+def test_login_usuario_com_senha_incorreta(client):
+    client.post(
+        "/usuarios/cadastro",
+        json={
+            "nome": "Usuario Login",
+            "email": "senha.errada@exemplo.com",
+            "senha": "SenhaSegura123"
+        }
+    )
+
+    resposta = client.post(
+        "/usuarios/login",
+        json={
+            "email": "senha.errada@exemplo.com",
+            "senha": "SenhaIncorreta999"
+        }
+    )
+
+    assert resposta.status_code == 401
+    assert resposta.json()["detail"] == "E-mail ou senha incorretos."
+
+
+def test_login_usuario_com_email_inexistente(client):
+    resposta = client.post(
+        "/usuarios/login",
+        json={
+            "email": "nao.existe@exemplo.com",
+            "senha": "SenhaSegura123"
+        }
+    )
+
+    assert resposta.status_code == 401
+    assert resposta.json()["detail"] == "E-mail ou senha incorretos."
+
+
+def test_obter_usuario_autenticado_com_token_valido(client):
+    cadastro = client.post(
+        "/usuarios/cadastro",
+        json={
+            "nome": "Usuario Autenticado",
+            "email": "me@exemplo.com",
+            "senha": "SenhaSegura123"
+        }
+    )
+    usuario_id = cadastro.json()["id"]
+
+    login = client.post(
+        "/usuarios/login",
+        json={
+            "email": "me@exemplo.com",
+            "senha": "SenhaSegura123"
+        }
+    )
+    token = login.json()["access_token"]
+
+    resposta = client.get(
+        "/usuarios/me",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json() == {
+        "mensagem": "Token válido.",
+        "usuario_id": str(usuario_id)
+    }
+
+
+def test_obter_usuario_autenticado_com_token_invalido(client):
+    resposta = client.get(
+        "/usuarios/me",
+        headers={"Authorization": "Bearer token-invalido"}
+    )
+
+    assert resposta.status_code == 401
+    assert resposta.json()["detail"] == "Token inválido ou expirado."
+
+
+def test_obter_usuario_autenticado_sem_token(client):
+    resposta = client.get("/usuarios/me")
+
+    assert resposta.status_code in (401, 403)
+

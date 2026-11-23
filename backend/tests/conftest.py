@@ -2,7 +2,10 @@ import os
 
 import pytest
 
-os.environ.setdefault("JWT_SECRET_KEY", "chave-secreta-de-teste")
+os.environ.setdefault(
+    "JWT_SECRET_KEY",
+    "chave-secreta-de-teste-com-pelo-menos-32-bytes",
+)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
