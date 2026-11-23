@@ -6,8 +6,10 @@ from core.config import settings
 from core.database import get_db
 from core.exceptions import TokenInvalidoError, UsuarioNaoEncontradoError
 from core.security import PasswordHasher, TokenService
+from integrations.google_books_client import GoogleBooksClient
 from models.usuario import Usuario
 from repositories.usuario_repository import UsuarioRepository
+from services.livro_service import LivroService
 from services.usuario_service import UsuarioService
 
 bearer_scheme = HTTPBearer()
@@ -42,6 +44,19 @@ def get_usuario_service(
         password_hasher=password_hasher,
         token_service=token_service,
     )
+
+
+def get_google_books_client() -> GoogleBooksClient:
+    return GoogleBooksClient(
+        api_key=settings.google_books_api_key,
+        timeout=settings.google_books_timeout,
+    )
+
+
+def get_livro_service(
+    google_books_client: GoogleBooksClient = Depends(get_google_books_client),
+) -> LivroService:
+    return LivroService(google_books_client=google_books_client)
 
 
 def get_usuario_atual(

@@ -1,6 +1,10 @@
+from core.dependencies import get_google_books_client
+from core.exceptions import ErroIntegracaoExternaError
+from main import app
 
-def test_pesquisar_livros_com_sucesso(client, monkeypatch):
-    def mock_buscar_livros(termo):
+
+class FakeGoogleBooksClientSucesso:
+    def buscar_volumes(self, termo: str, max_resultados: int = 10) -> dict:
         return {
             "total": 1,
             "livros": [
@@ -12,19 +16,27 @@ def test_pesquisar_livros_com_sucesso(client, monkeypatch):
                     "editora": "Arqueiro",
                     "data_publicacao": "2009",
                     "isbn": "9788599296493",
-                    "capa": "https://exemplo.com/capa.jpg"
+                    "capa": "https://exemplo.com/capa.jpg",
                 }
-            ]
+            ],
         }
 
-    monkeypatch.setattr(
-        "routers.livros.buscar_livros",
-        mock_buscar_livros
+
+class FakeGoogleBooksClientErro:
+    def buscar_volumes(self, termo: str, max_resultados: int = 10) -> dict:
+        raise ErroIntegracaoExternaError(
+            "Não foi possível conectar à Google Books API."
+        )
+
+
+def test_pesquisar_livros_com_sucesso(client):
+    app.dependency_overrides[get_google_books_client] = (
+        lambda: FakeGoogleBooksClientSucesso()
     )
 
     resposta = client.get(
         "/livros/pesquisa",
-        params={"termo": "O Nome do Vento"}
+        params={"termo": "O Nome do Vento"},
     )
 
     assert resposta.status_code == 200
@@ -40,24 +52,20 @@ def test_pesquisar_livros_com_sucesso(client, monkeypatch):
 def test_pesquisar_livros_com_termo_curto(client):
     resposta = client.get(
         "/livros/pesquisa",
-        params={"termo": "A"}
+        params={"termo": "A"},
     )
 
     assert resposta.status_code == 422
 
 
-def test_pesquisar_livros_com_erro_na_api(client, monkeypatch):
-    def mock_buscar_livros(termo):
-        raise RuntimeError("Não foi possível conectar à Google Books API.")
-
-    monkeypatch.setattr(
-        "routers.livros.buscar_livros",
-        mock_buscar_livros
+def test_pesquisar_livros_com_erro_na_api(client):
+    app.dependency_overrides[get_google_books_client] = (
+        lambda: FakeGoogleBooksClientErro()
     )
 
     resposta = client.get(
         "/livros/pesquisa",
-        params={"termo": "Harry Potter"}
+        params={"termo": "Harry Potter"},
     )
 
     assert resposta.status_code == 502
