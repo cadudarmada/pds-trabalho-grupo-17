@@ -1,11 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
 
-from core.config import settings
-from core.database import get_db
-from core.exceptions import TokenInvalidoError
-from core.security import TokenService
+from core.dependencies import get_usuario_atual, get_usuario_service
+from core.exceptions import CredenciaisInvalidasError, EmailJaCadastradoError
+from models.usuario import Usuario
 from schemas.usuario import (
     Token,
     UsuarioAutenticadoResponse,
@@ -13,93 +10,64 @@ from schemas.usuario import (
     UsuarioLogin,
     UsuarioResponse,
 )
-from crud import buscar_usuario_por_email, criar_usuario, autenticar_usuario
+from services.usuario_service import UsuarioService
 
 router = APIRouter(
     prefix="/usuarios",
-    tags=["Usuários"]
+    tags=["Usuários"],
 )
 
-bearer_scheme = HTTPBearer()
-
-
-def _obter_token_service() -> TokenService:
-    return TokenService(
-        secret_key=settings.jwt_secret_key,
-        algorithm=settings.jwt_algorithm,
-        expire_minutes=settings.jwt_expire_minutes,
-    )
 
 @router.post(
     "/cadastro",
     response_model=UsuarioResponse,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 def cadastrar_usuario(
-    usuario: UsuarioCreate,
-    db: Session = Depends(get_db)
+    dados: UsuarioCreate,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
 ):
-    usuario_existente = buscar_usuario_por_email(db, usuario.email)
-
-    if usuario_existente:
+    try:
+        return usuario_service.cadastrar(
+            nome=dados.nome,
+            email=dados.email,
+            senha=dados.senha,
+        )
+    except EmailJaCadastradoError as erro:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Este e-mail já está cadastrado."
+            detail=erro.mensagem,
         )
 
-    novo_usuario = criar_usuario(db, usuario)
-
-    return novo_usuario
 
 @router.post(
     "/login",
     response_model=Token,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 def login_usuario(
     dados: UsuarioLogin,
-    db: Session = Depends(get_db)
+    usuario_service: UsuarioService = Depends(get_usuario_service),
 ):
-    usuario = autenticar_usuario(db, dados.email, dados.senha)
-
-    if usuario is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="E-mail ou senha incorretos."
-        )
-
-    token_service = _obter_token_service()
-    access_token = token_service.criar_access_token(usuario.id)
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
-
-@router.get("/me", response_model=UsuarioAutenticadoResponse)
-def obter_usuario_autenticado(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
-):
-    token_service = _obter_token_service()
-
     try:
-        payload = token_service.decodificar_token(credentials.credentials)
-    except TokenInvalidoError as erro:
+        access_token = usuario_service.login(
+            email=dados.email,
+            senha=dados.senha,
+        )
+    except CredenciaisInvalidasError as erro:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=erro.mensagem,
-            headers={"WWW-Authenticate": "Bearer"}
         )
 
-    usuario_id = payload.get("sub")
+    return Token(access_token=access_token, token_type="bearer")
 
-    if usuario_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token não contém identificação do usuário."
-        )
 
-    return {
-        "mensagem": "Token válido.",
-        "usuario_id": usuario_id
-    }
+@router.get("/me", response_model=UsuarioAutenticadoResponse)
+def obter_usuario_autenticado(
+    usuario_atual: Usuario = Depends(get_usuario_atual),
+):
+    return UsuarioAutenticadoResponse(
+        mensagem="Token válido.",
+        usuario_id=str(usuario_atual.id),
+    )
