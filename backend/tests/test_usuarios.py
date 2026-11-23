@@ -1,4 +1,4 @@
-from security import verificar_senha
+from core.security import PasswordHasher
 from models import Usuario
 
 
@@ -126,12 +126,14 @@ def test_senha_e_armazenada_com_hash(client, db_session):
     assert usuario is not None
     assert usuario.senha_hash != "SenhaSegura123"
 
-    assert verificar_senha(
+    hasher = PasswordHasher()
+
+    assert hasher.verificar(
         "SenhaSegura123",
         usuario.senha_hash
     )
 
-    assert not verificar_senha(
+    assert not hasher.verificar(
         "SenhaErrada123",
         usuario.senha_hash
     )

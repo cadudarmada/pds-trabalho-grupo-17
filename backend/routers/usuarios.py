@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from core.config import settings
 from core.database import get_db
+from core.exceptions import TokenInvalidoError
+from core.security import TokenService
 from schemas import UsuarioCreate, UsuarioLogin, UsuarioResponse, Token
 from crud import buscar_usuario_por_email, criar_usuario, autenticar_usuario
-from jwt_utils import criar_access_token, verificar_access_token
 
 router = APIRouter(
     prefix="/usuarios",
@@ -13,6 +15,14 @@ router = APIRouter(
 )
 
 bearer_scheme = HTTPBearer()
+
+
+def _obter_token_service() -> TokenService:
+    return TokenService(
+        secret_key=settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
+        expire_minutes=settings.jwt_expire_minutes,
+    )
 
 @router.post(
     "/cadastro",
@@ -52,9 +62,8 @@ def login_usuario(
             detail="E-mail ou senha incorretos."
         )
 
-    access_token = criar_access_token(
-        dados={"sub": str(usuario.id)}
-    )
+    token_service = _obter_token_service()
+    access_token = token_service.criar_access_token(usuario.id)
 
     return {
         "access_token": access_token,
@@ -65,7 +74,16 @@ def login_usuario(
 def obter_usuario_autenticado(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
 ):
-    payload = verificar_access_token(credentials.credentials)
+    token_service = _obter_token_service()
+
+    try:
+        payload = token_service.decodificar_token(credentials.credentials)
+    except TokenInvalidoError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=erro.mensagem,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     usuario_id = payload.get("sub")
 
