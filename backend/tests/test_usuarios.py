@@ -1,6 +1,5 @@
 from security import verificar_senha
 from models import Usuario
-from database import SessionLocal
 
 
 
