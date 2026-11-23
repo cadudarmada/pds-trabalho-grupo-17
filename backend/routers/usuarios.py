@@ -6,7 +6,13 @@ from core.config import settings
 from core.database import get_db
 from core.exceptions import TokenInvalidoError
 from core.security import TokenService
-from schemas import UsuarioCreate, UsuarioLogin, UsuarioResponse, Token
+from schemas.usuario import (
+    Token,
+    UsuarioAutenticadoResponse,
+    UsuarioCreate,
+    UsuarioLogin,
+    UsuarioResponse,
+)
 from crud import buscar_usuario_por_email, criar_usuario, autenticar_usuario
 
 router = APIRouter(
@@ -70,7 +76,7 @@ def login_usuario(
         "token_type": "bearer"
     }
 
-@router.get("/me")
+@router.get("/me", response_model=UsuarioAutenticadoResponse)
 def obter_usuario_autenticado(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
 ):

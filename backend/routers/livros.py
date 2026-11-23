@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, HTTPException, Query
 
+from schemas.livro import PesquisaLivrosResponse
 from services.google_books import buscar_livros
 
 router = APIRouter(
@@ -9,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/pesquisa")
+@router.get("/pesquisa", response_model=PesquisaLivrosResponse)
 def pesquisar_livros(
     termo: str = Query(
         min_length=2,

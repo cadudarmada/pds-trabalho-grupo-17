@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from core.security import PasswordHasher
 from models.usuario import Usuario
 from repositories.usuario_repository import UsuarioRepository
-from schemas import UsuarioCreate
+from schemas.usuario import UsuarioCreate
 
 password_hasher = PasswordHasher()
 

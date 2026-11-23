@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class UsuarioCreate(BaseModel):
@@ -9,11 +10,11 @@ class UsuarioCreate(BaseModel):
 
     @field_validator("nome")
     @classmethod
-    def validar_nome(cls, valor):
+    def validar_nome(cls, valor: str) -> str:
         valor = valor.strip()
 
-        if not valor:
-            raise ValueError("O nome não pode estar vazio.")
+        if len(valor) < 3:
+            raise ValueError("O nome precisa ter pelo menos 3 caracteres.")
 
         return valor
 
@@ -31,6 +32,12 @@ class UsuarioResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class UsuarioAutenticadoResponse(BaseModel):
+    mensagem: str
+    usuario_id: str
