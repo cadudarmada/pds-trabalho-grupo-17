@@ -116,3 +116,127 @@ def test_usuarios_diferentes_podem_adicionar_mesmo_livro_com_bibliotecas_isolada
 
     assert [item["livro"]["titulo"] for item in lista_ana] == ["Fundação", "Duna"]
     assert [item["livro"]["titulo"] for item in lista_bruno] == ["Duna"]
+
+
+def test_livro_adicionado_inicia_com_status_quero_ler(client):
+    headers = _criar_usuario_e_obter_headers(client, "Ana Silva", "ana@exemplo.com")
+
+    resposta = client.post("/biblioteca", json=_payload_livro(), headers=headers)
+
+    assert resposta.status_code == 201
+    assert resposta.json()["status"] == "QUERO_LER"
+
+
+def test_atualizar_status_leitura_com_sucesso(client):
+    headers = _criar_usuario_e_obter_headers(client, "Ana Silva", "ana@exemplo.com")
+
+    criado = client.post("/biblioteca", json=_payload_livro(), headers=headers).json()
+    item_id = criado["id"]
+
+    for novo_status in ("LENDO", "LIDO", "ABANDONADO"):
+        resposta = client.patch(
+            f"/biblioteca/{item_id}/status",
+            json={"status": novo_status},
+            headers=headers,
+        )
+
+        assert resposta.status_code == 200
+        assert resposta.json()["status"] == novo_status
+
+    lista = client.get("/biblioteca", headers=headers).json()
+    assert lista[0]["status"] == "ABANDONADO"
+
+
+def test_atualizar_status_com_valor_invalido_retorna_422(client):
+    headers = _criar_usuario_e_obter_headers(client, "Ana Silva", "ana@exemplo.com")
+    criado = client.post("/biblioteca", json=_payload_livro(), headers=headers).json()
+
+    resposta = client.patch(
+        f"/biblioteca/{criado['id']}/status",
+        json={"status": "CONCLUIDO"},
+        headers=headers,
+    )
+
+    assert resposta.status_code == 422
+
+
+def test_atualizar_status_sem_autenticacao(client):
+    resposta = client.patch("/biblioteca/1/status", json={"status": "LENDO"})
+
+    assert resposta.status_code in (401, 403)
+
+
+def test_atualizar_status_item_inexistente_retorna_404(client):
+    headers = _criar_usuario_e_obter_headers(client, "Ana Silva", "ana@exemplo.com")
+
+    resposta = client.patch(
+        "/biblioteca/999/status",
+        json={"status": "LIDO"},
+        headers=headers,
+    )
+
+    assert resposta.status_code == 404
+    assert resposta.json()["detail"] == "Livro não encontrado na sua biblioteca."
+
+
+def test_usuario_nao_pode_atualizar_status_de_livro_de_outro_usuario(client):
+    headers_ana = _criar_usuario_e_obter_headers(client, "Ana Silva", "ana@exemplo.com")
+    headers_bruno = _criar_usuario_e_obter_headers(client, "Bruno Lima", "bruno@exemplo.com")
+
+    item_ana = client.post("/biblioteca", json=_payload_livro(), headers=headers_ana).json()
+
+    tentativa_bruno = client.patch(
+        f"/biblioteca/{item_ana['id']}/status",
+        json={"status": "LIDO"},
+        headers=headers_bruno,
+    )
+
+    assert tentativa_bruno.status_code == 404
+
+    biblioteca_ana = client.get("/biblioteca", headers=headers_ana).json()
+    assert biblioteca_ana[0]["status"] == "QUERO_LER"
+
+
+def test_filtrar_biblioteca_por_status(client):
+    headers = _criar_usuario_e_obter_headers(client, "Ana Silva", "ana@exemplo.com")
+
+    item_duna = client.post(
+        "/biblioteca", json=_payload_livro("gb_1", "Duna"), headers=headers
+    ).json()
+    item_fundacao = client.post(
+        "/biblioteca", json=_payload_livro("gb_2", "Fundação"), headers=headers
+    ).json()
+    client.post(
+        "/biblioteca", json=_payload_livro("gb_3", "O Hobbit"), headers=headers
+    )
+
+    client.patch(
+        f"/biblioteca/{item_duna['id']}/status",
+        json={"status": "LENDO"},
+        headers=headers,
+    )
+    client.patch(
+        f"/biblioteca/{item_fundacao['id']}/status",
+        json={"status": "LIDO"},
+        headers=headers,
+    )
+
+    lendo = client.get("/biblioteca", params={"status": "LENDO"}, headers=headers)
+    lido = client.get("/biblioteca", params={"status": "LIDO"}, headers=headers)
+    abandonado = client.get(
+        "/biblioteca", params={"status": "ABANDONADO"}, headers=headers
+    )
+    invalido = client.get(
+        "/biblioteca", params={"status": "INVALIDO"}, headers=headers
+    )
+
+    assert lendo.status_code == 200
+    assert [item["livro"]["titulo"] for item in lendo.json()] == ["Duna"]
+
+    assert lido.status_code == 200
+    assert [item["livro"]["titulo"] for item in lido.json()] == ["Fundação"]
+
+    assert abandonado.status_code == 200
+    assert abandonado.json() == []
+
+    assert invalido.status_code == 422
