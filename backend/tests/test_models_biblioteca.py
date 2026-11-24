@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from models.livro import Livro
 from models.usuario import Usuario
-from models.usuario_livro import UsuarioLivro
+from models.usuario_livro import StatusLeitura, UsuarioLivro
 
 
 def test_livro_criar_normaliza_campos_e_lista_autores():
@@ -74,3 +74,44 @@ def test_relacionamento_e_unicidade_na_biblioteca(db_session):
         db_session.commit()
 
     db_session.rollback()
+
+
+def test_usuario_livro_status_padrao_e_atualizacao():
+    item = UsuarioLivro.criar(usuario_id=1, livro_id=2)
+
+    assert item.status == StatusLeitura.QUERO_LER.value
+
+    item.atualizar_status(StatusLeitura.LENDO)
+    assert item.status == StatusLeitura.LENDO.value
+
+    item.atualizar_status("lido")
+    assert item.status == StatusLeitura.LIDO.value
+
+
+def test_usuario_livro_rejeita_status_invalido():
+    with pytest.raises(ValueError):
+        UsuarioLivro.criar(usuario_id=1, livro_id=2, status="INVALIDO")
+
+    item = UsuarioLivro.criar(usuario_id=1, livro_id=2)
+    with pytest.raises(ValueError):
+        item.atualizar_status("EM_ANDAMENTO")
+
+
+def test_usuario_livro_persiste_status_no_banco(db_session):
+    usuario = Usuario.criar("Carla Souza", "carla@exemplo.com", "hash1")
+    livro = Livro.criar(google_books_id="gb_status", titulo="O Hobbit")
+    db_session.add_all([usuario, livro])
+    db_session.commit()
+
+    item = UsuarioLivro.criar(usuario_id=usuario.id, livro_id=livro.id)
+    db_session.add(item)
+    db_session.commit()
+    db_session.refresh(item)
+
+    assert item.status == StatusLeitura.QUERO_LER.value
+
+    item.atualizar_status(StatusLeitura.ABANDONADO)
+    db_session.commit()
+    db_session.refresh(item)
+
+    assert item.status == StatusLeitura.ABANDONADO.value
