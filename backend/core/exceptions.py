@@ -28,3 +28,11 @@ class UsuarioNaoEncontradoError(ErroDominio):
 
 class ErroIntegracaoExternaError(ErroDominio):
     """Erro ao se comunicar com uma API externa (ex.: Google Books)."""
+
+
+class LivroJaNaBibliotecaError(ErroDominio):
+    def __init__(
+        self,
+        mensagem: str = "Este livro já está na sua biblioteca.",
+    ) -> None:
+        super().__init__(mensagem)
