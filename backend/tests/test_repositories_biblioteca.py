@@ -1,6 +1,6 @@
 from models.livro import Livro
 from models.usuario import Usuario
-from models.usuario_livro import UsuarioLivro
+from models.usuario_livro import StatusLeitura, UsuarioLivro
 from repositories.livro_repository import LivroRepository
 from repositories.usuario_livro_repository import UsuarioLivroRepository
 from repositories.usuario_repository import UsuarioRepository
@@ -54,3 +54,31 @@ def test_usuario_livro_repository_criar_buscar_e_listar(db_session):
 
     lista_u2 = biblioteca_repo.listar_por_usuario(usuario_2.id)
     assert [item.livro.titulo for item in lista_u2] == ["Duna"]
+
+
+def test_usuario_livro_repository_buscar_por_id_e_usuario_atualizar_e_filtrar(db_session):
+    usuario_repo = UsuarioRepository(db_session)
+    livro_repo = LivroRepository(db_session)
+    biblioteca_repo = UsuarioLivroRepository(db_session)
+
+    ana = usuario_repo.criar(Usuario.criar("Ana Silva", "ana@exemplo.com", "hash1"))
+    bruno = usuario_repo.criar(Usuario.criar("Bruno Lima", "bruno@exemplo.com", "hash2"))
+
+    duna = livro_repo.criar(Livro.criar(google_books_id="gb_1", titulo="Duna"))
+    fundacao = livro_repo.criar(Livro.criar(google_books_id="gb_2", titulo="Fundação"))
+
+    item_duna = biblioteca_repo.criar(UsuarioLivro.criar(ana.id, duna.id))
+    biblioteca_repo.criar(UsuarioLivro.criar(ana.id, fundacao.id))
+
+    assert biblioteca_repo.buscar_por_id_e_usuario(item_duna.id, ana.id) is not None
+    assert biblioteca_repo.buscar_por_id_e_usuario(item_duna.id, bruno.id) is None
+
+    item_duna.atualizar_status(StatusLeitura.LENDO)
+    atualizado = biblioteca_repo.atualizar(item_duna)
+    assert atualizado.status == StatusLeitura.LENDO.value
+
+    lendo = biblioteca_repo.listar_por_usuario(ana.id, status=StatusLeitura.LENDO)
+    quero_ler = biblioteca_repo.listar_por_usuario(ana.id, status=StatusLeitura.QUERO_LER)
+
+    assert [item.livro.titulo for item in lendo] == ["Duna"]
+    assert [item.livro.titulo for item in quero_ler] == ["Fundação"]
