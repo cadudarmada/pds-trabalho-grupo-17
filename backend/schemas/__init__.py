@@ -1,5 +1,6 @@
 from schemas.biblioteca import (
     AdicionarLivroBibliotecaRequest,
+    AtualizarStatusBibliotecaRequest,
     ItemBibliotecaResponse,
     LivroBibliotecaResponse,
 )
@@ -14,6 +15,7 @@ from schemas.usuario import (
 
 __all__ = [
     "AdicionarLivroBibliotecaRequest",
+    "AtualizarStatusBibliotecaRequest",
     "ItemBibliotecaResponse",
     "LivroBibliotecaResponse",
     "LivroPesquisaItem",

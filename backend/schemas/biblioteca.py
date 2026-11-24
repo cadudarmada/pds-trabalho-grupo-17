@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from models.usuario_livro import UsuarioLivro
+from models.usuario_livro import StatusLeitura, UsuarioLivro
 
 
 class AdicionarLivroBibliotecaRequest(BaseModel):
@@ -24,6 +24,10 @@ class AdicionarLivroBibliotecaRequest(BaseModel):
         return valor_limpo
 
 
+class AtualizarStatusBibliotecaRequest(BaseModel):
+    status: StatusLeitura
+
+
 class LivroBibliotecaResponse(BaseModel):
     id: int
     google_books_id: str
@@ -38,6 +42,7 @@ class LivroBibliotecaResponse(BaseModel):
 
 class ItemBibliotecaResponse(BaseModel):
     id: int
+    status: StatusLeitura
     data_adicao: datetime
     livro: LivroBibliotecaResponse
 
@@ -46,6 +51,7 @@ class ItemBibliotecaResponse(BaseModel):
         livro = item.livro
         return cls(
             id=item.id,
+            status=StatusLeitura(item.status),
             data_adicao=item.data_adicao,
             livro=LivroBibliotecaResponse(
                 id=livro.id,
