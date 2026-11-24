@@ -48,7 +48,45 @@
 
 .secao-colecao h2 {
   font-size: 23px;
-  margin: 0 0 22px;
+  margin: 0;
+}
+
+.colecao-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.filtros-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro-botao {
+  padding: 8px 14px;
+  border: 1px solid #d5dfd8;
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.filtro-botao:hover {
+  border-color: #397653;
+  color: #397653;
+}
+
+.filtro-botao.ativo {
+  background-color: #397653;
+  border-color: #397653;
+  color: #ffffff;
 }
 
 .biblioteca-vazia {
@@ -121,6 +159,95 @@
 
 .biblioteca-informacoes {
   min-width: 0;
+  flex: 1;
+}
+
+.biblioteca-titulo-linha {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-quero_ler {
+  background-color: #edf3ef;
+  color: #2d6043;
+}
+
+.status-lendo {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-lido {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-abandonado {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.biblioteca-status-controle {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.biblioteca-status-controle label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #263b32;
+}
+
+.biblioteca-status-controle select {
+  padding: 7px 12px;
+  border: 1px solid #d5dfd8;
+  border-radius: 7px;
+  background-color: #ffffff;
+  color: #263b32;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.biblioteca-status-controle select:focus {
+  border-color: #397653;
+}
+
+.biblioteca-status-controle select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status-feedback {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-feedback.salvando {
+  color: #65746a;
+}
+
+.status-feedback.sucesso {
+  color: #2d6043;
+}
+
+.status-feedback.erro {
+  color: #b42318;
 }
 
 .biblioteca-informacoes h3 {
