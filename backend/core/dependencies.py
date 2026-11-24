@@ -8,7 +8,10 @@ from core.exceptions import TokenInvalidoError, UsuarioNaoEncontradoError
 from core.security import PasswordHasher, TokenService
 from integrations.google_books_client import GoogleBooksClient
 from models.usuario import Usuario
+from repositories.livro_repository import LivroRepository
+from repositories.usuario_livro_repository import UsuarioLivroRepository
 from repositories.usuario_repository import UsuarioRepository
+from services.biblioteca_service import BibliotecaService
 from services.livro_service import LivroService
 from services.usuario_service import UsuarioService
 
@@ -57,6 +60,30 @@ def get_livro_service(
     google_books_client: GoogleBooksClient = Depends(get_google_books_client),
 ) -> LivroService:
     return LivroService(google_books_client=google_books_client)
+
+
+def get_livro_repository(
+    db: Session = Depends(get_db),
+) -> LivroRepository:
+    return LivroRepository(db)
+
+
+def get_usuario_livro_repository(
+    db: Session = Depends(get_db),
+) -> UsuarioLivroRepository:
+    return UsuarioLivroRepository(db)
+
+
+def get_biblioteca_service(
+    livro_repository: LivroRepository = Depends(get_livro_repository),
+    usuario_livro_repository: UsuarioLivroRepository = Depends(
+        get_usuario_livro_repository
+    ),
+) -> BibliotecaService:
+    return BibliotecaService(
+        livro_repository=livro_repository,
+        usuario_livro_repository=usuario_livro_repository,
+    )
 
 
 def get_usuario_atual(

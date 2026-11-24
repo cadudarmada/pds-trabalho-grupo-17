@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import usuarios, livros
+from routers import biblioteca, livros, usuarios
 
 app = FastAPI()
 
@@ -15,6 +15,7 @@ app.add_middleware(
 
 app.include_router(usuarios.router)
 app.include_router(livros.router)
+app.include_router(biblioteca.router)
 
 
 @app.get("/")
