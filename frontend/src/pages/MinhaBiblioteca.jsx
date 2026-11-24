@@ -2,15 +2,24 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./MinhaBiblioteca.css";
 
+function formatarData(dataIso) {
+  if (!dataIso) {
+    return "";
+  }
+
+  return new Date(dataIso).toLocaleDateString("pt-BR");
+}
+
 function MinhaBiblioteca() {
   const navigate = useNavigate();
+  const [itens, setItens] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     let ativo = true;
 
-    async function validarSessao() {
+    async function carregarBiblioteca() {
       const token = sessionStorage.getItem("access_token");
 
       if (!token) {
@@ -19,7 +28,7 @@ function MinhaBiblioteca() {
       }
 
       try {
-        const resposta = await fetch("http://127.0.0.1:8000/usuarios/me", {
+        const resposta = await fetch("http://127.0.0.1:8000/biblioteca", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -30,24 +39,35 @@ function MinhaBiblioteca() {
           return;
         }
 
-        if (!resposta.ok) {
+        if (resposta.status === 401) {
           sessionStorage.removeItem("access_token");
           navigate("/login", { replace: true });
           return;
         }
 
-        setCarregando(false);
-      } catch {
+        if (!resposta.ok) {
+          throw new Error("Não foi possível carregar sua biblioteca.");
+        }
+
+        const dados = await resposta.json();
+        setItens(dados);
+      } catch (erroRequisicao) {
         if (!ativo) {
           return;
         }
 
-        setErro("Não foi possível verificar sua sessão. Tente novamente.");
-        setCarregando(false);
+        setErro(
+          erroRequisicao.message ||
+            "Não foi possível conectar ao servidor. Tente novamente."
+        );
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
       }
     }
 
-    validarSessao();
+    carregarBiblioteca();
 
     return () => {
       ativo = false;
@@ -61,6 +81,10 @@ function MinhaBiblioteca() {
       </main>
     );
   }
+
+  const totalLivros = itens.length;
+  const rotuloTotal =
+    totalLivros === 1 ? "1 livro" : `${totalLivros} livros`;
 
   return (
     <main className="pagina-biblioteca">
@@ -82,20 +106,71 @@ function MinhaBiblioteca() {
         <p className="mensagem-erro">{erro}</p>
       ) : (
         <section className="secao-colecao">
-          <h2>Sua coleção</h2>
+          <h2>
+            Sua coleção {totalLivros > 0 ? `(${rotuloTotal})` : ""}
+          </h2>
 
-          <div className="biblioteca-vazia">
-            <p className="biblioteca-vazia-titulo">
-              Sua biblioteca ainda está vazia.
-            </p>
-            <p className="biblioteca-vazia-descricao">
-              Pesquise por títulos ou autores para começar a montar sua estante
-              pessoal.
-            </p>
-            <Link to="/" className="botao-explorar">
-              Explorar catálogo
-            </Link>
-          </div>
+          {totalLivros === 0 ? (
+            <div className="biblioteca-vazia">
+              <p className="biblioteca-vazia-titulo">
+                Sua biblioteca ainda está vazia.
+              </p>
+              <p className="biblioteca-vazia-descricao">
+                Pesquise por títulos ou autores para começar a montar sua
+                estante pessoal.
+              </p>
+              <Link to="/" className="botao-explorar">
+                Explorar catálogo
+              </Link>
+            </div>
+          ) : (
+            <div className="lista-biblioteca">
+              {itens.map((item) => {
+                const { livro } = item;
+
+                return (
+                  <article className="biblioteca-card" key={item.id}>
+                    <div className="biblioteca-capa">
+                      {livro.capa ? (
+                        <img
+                          src={livro.capa}
+                          alt={`Capa de ${livro.titulo}`}
+                        />
+                      ) : (
+                        <div className="biblioteca-capa-indisponivel">
+                          Capa indisponível
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="biblioteca-informacoes">
+                      <h3>{livro.titulo}</h3>
+
+                      <p className="biblioteca-autores">
+                        {livro.autores.join(", ") || "Autor não informado"}
+                      </p>
+
+                      <p className="biblioteca-meta">
+                        {livro.editora || "Editora não informada"}
+                        {" · "}
+                        {livro.data_publicacao || "Data não informada"}
+                      </p>
+
+                      <p className="biblioteca-data-adicao">
+                        Adicionado em {formatarData(item.data_adicao)}
+                      </p>
+
+                      {livro.descricao && (
+                        <p className="biblioteca-descricao">
+                          {livro.descricao}
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
     </main>

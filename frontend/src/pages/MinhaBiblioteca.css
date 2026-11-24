@@ -79,6 +79,82 @@
   color: #65746a;
 }
 
+.lista-biblioteca {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.biblioteca-card {
+  display: flex;
+  gap: 20px;
+  padding: 18px;
+  background-color: #ffffff;
+  border: 1px solid #e3e9e5;
+  border-radius: 9px;
+}
+
+.biblioteca-capa {
+  flex-shrink: 0;
+  width: 115px;
+}
+
+.biblioteca-capa img {
+  width: 100%;
+  height: 165px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.biblioteca-capa-indisponivel {
+  width: 100%;
+  height: 165px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #edf3ef;
+  color: #65746a;
+  font-size: 12px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.biblioteca-informacoes {
+  min-width: 0;
+}
+
+.biblioteca-informacoes h3 {
+  color: #263b32;
+  font-size: 19px;
+  margin: 2px 0 8px;
+}
+
+.biblioteca-informacoes p {
+  color: #65746a;
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.biblioteca-informacoes .biblioteca-autores {
+  color: #397653;
+  font-weight: 600;
+}
+
+.biblioteca-informacoes .biblioteca-data-adicao {
+  font-size: 12px;
+  color: #7c8c81;
+}
+
+.biblioteca-informacoes .biblioteca-descricao {
+  margin-top: 10px;
+  line-height: 1.5;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 @media (max-width: 600px) {
   .pagina-biblioteca {
     padding: 24px 16px;
@@ -92,5 +168,19 @@
 
   .introducao-texto h1 {
     font-size: 27px;
+  }
+
+  .biblioteca-card {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .biblioteca-capa {
+    width: 85px;
+  }
+
+  .biblioteca-capa img,
+  .biblioteca-capa-indisponivel {
+    height: 125px;
   }
 }
