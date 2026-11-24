@@ -1,6 +1,10 @@
-from core.exceptions import LivroJaNaBibliotecaError
+from core.exceptions import (
+    LivroJaNaBibliotecaError,
+    LivroNaoEncontradoNaBibliotecaError,
+    StatusLeituraInvalidoError,
+)
 from models.livro import Livro
-from models.usuario_livro import UsuarioLivro
+from models.usuario_livro import StatusLeitura, UsuarioLivro
 from repositories.livro_repository import LivroRepository
 from repositories.usuario_livro_repository import UsuarioLivroRepository
 
@@ -58,5 +62,33 @@ class BibliotecaService:
 
         return self._usuario_livro_repository.criar(novo_item)
 
-    def listar_biblioteca(self, usuario_id: int) -> list[UsuarioLivro]:
-        return self._usuario_livro_repository.listar_por_usuario(usuario_id)
+    def listar_biblioteca(
+        self,
+        usuario_id: int,
+        status: StatusLeitura | None = None,
+    ) -> list[UsuarioLivro]:
+        return self._usuario_livro_repository.listar_por_usuario(
+            usuario_id=usuario_id,
+            status=status,
+        )
+
+    def atualizar_status(
+        self,
+        usuario_id: int,
+        usuario_livro_id: int,
+        novo_status: StatusLeitura | str,
+    ) -> UsuarioLivro:
+        item = self._usuario_livro_repository.buscar_por_id_e_usuario(
+            usuario_livro_id=usuario_livro_id,
+            usuario_id=usuario_id,
+        )
+
+        if item is None:
+            raise LivroNaoEncontradoNaBibliotecaError()
+
+        try:
+            item.atualizar_status(novo_status)
+        except ValueError as erro:
+            raise StatusLeituraInvalidoError(str(erro)) from erro
+
+        return self._usuario_livro_repository.atualizar(item)

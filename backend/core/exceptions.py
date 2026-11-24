@@ -36,3 +36,19 @@ class LivroJaNaBibliotecaError(ErroDominio):
         mensagem: str = "Este livro já está na sua biblioteca.",
     ) -> None:
         super().__init__(mensagem)
+
+
+class LivroNaoEncontradoNaBibliotecaError(ErroDominio):
+    def __init__(
+        self,
+        mensagem: str = "Livro não encontrado na sua biblioteca.",
+    ) -> None:
+        super().__init__(mensagem)
+
+
+class StatusLeituraInvalidoError(ErroDominio):
+    def __init__(
+        self,
+        mensagem: str = "Status de leitura inválido.",
+    ) -> None:
+        super().__init__(mensagem)
