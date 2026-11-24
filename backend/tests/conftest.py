@@ -14,7 +14,7 @@ from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 
 from core.database import Base, get_db
-from models.usuario import Usuario
+from models import Livro, Usuario, UsuarioLivro
 from main import app
 
 

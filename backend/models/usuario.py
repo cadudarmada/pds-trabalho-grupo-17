@@ -1,4 +1,5 @@
 from sqlalchemy import Column, DateTime, Integer, String, func
+from sqlalchemy.orm import relationship
 
 from core.database import Base
 from core.security import PasswordHasher
@@ -15,6 +16,12 @@ class Usuario(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
+    )
+
+    livros_biblioteca = relationship(
+        "UsuarioLivro",
+        back_populates="usuario",
+        cascade="all, delete-orphan",
     )
 
     @staticmethod
