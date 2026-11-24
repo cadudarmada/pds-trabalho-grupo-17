@@ -1,9 +1,10 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Cadastro.css";
 
 function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -82,11 +83,9 @@ function Login() {
         );
       }
 
-      setTipoMensagem("sucesso");
-      setMensagem("Login realizado com sucesso!");
-
       setEmail("");
       setSenha("");
+      navigate("/biblioteca");
 
     } catch (erro) {
       setTipoMensagem("erro");
